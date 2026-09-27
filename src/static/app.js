@@ -3,6 +3,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const authButton = document.getElementById("auth-button");
+  const authStatus = document.getElementById("auth-status");
+  const loginDialog = document.getElementById("login-dialog");
+  const loginForm = document.getElementById("login-form");
+  const loginError = document.getElementById("login-error");
+  const cancelLogin = document.getElementById("cancel-login");
+  const tokenKey = "mergington_teacher_token";
+
+  let teacher = null;
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem(tokenKey);
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function updateAuthUI() {
+    const isTeacher = Boolean(teacher);
+    authButton.textContent = isTeacher
+      ? `Log Out (${teacher.username})`
+      : "Teacher Login";
+    authStatus.textContent = isTeacher
+      ? "You are signed in as a teacher and can manage registrations."
+      : "Teacher login is required to manage registrations.";
+    signupForm.querySelectorAll("input, select, button").forEach((field) => {
+      field.disabled = !isTeacher;
+    });
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+      button.hidden = !isTeacher;
+    });
+  }
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -60,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".delete-btn").forEach((button) => {
         button.addEventListener("click", handleUnregister);
       });
+      updateAuthUI();
     } catch (error) {
       activitiesList.innerHTML =
         "<p>Failed to load activities. Please try again later.</p>";
@@ -80,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         )}/unregister?email=${encodeURIComponent(email)}`,
         {
           method: "DELETE",
+          headers: getAuthHeaders(),
         }
       );
 
@@ -124,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
         )}/signup?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
+          headers: getAuthHeaders(),
         }
       );
 
@@ -155,6 +188,64 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  authButton.addEventListener("click", () => {
+    if (teacher) {
+      localStorage.removeItem(tokenKey);
+      teacher = null;
+      updateAuthUI();
+      return;
+    }
+    loginError.classList.add("hidden");
+    loginForm.reset();
+    loginDialog.showModal();
+  });
+
+  cancelLogin.addEventListener("click", () => loginDialog.close());
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    loginError.classList.add("hidden");
+
+    try {
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.detail || "Unable to log in");
+      }
+
+      localStorage.setItem(tokenKey, result.access_token);
+      teacher = { username: result.username };
+      loginDialog.close();
+      updateAuthUI();
+    } catch (error) {
+      loginError.textContent = error.message;
+      loginError.classList.remove("hidden");
+    }
+  });
+
+  async function restoreSession() {
+    if (!localStorage.getItem(tokenKey)) {
+      updateAuthUI();
+      return;
+    }
+
+    const response = await fetch("/auth/me", { headers: getAuthHeaders() });
+    if (response.ok) {
+      teacher = await response.json();
+    } else {
+      localStorage.removeItem(tokenKey);
+    }
+    updateAuthUI();
+  }
+
   // Initialize app
-  fetchActivities();
+  restoreSession().then(fetchActivities);
 });

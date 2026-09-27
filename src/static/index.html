@@ -8,6 +8,7 @@
   </head>
   <body>
     <header>
+      <button id="auth-button" class="auth-button" type="button">Teacher Login</button>
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
     </header>
@@ -23,6 +24,7 @@
 
       <section id="signup-container">
         <h3>Sign Up for an Activity</h3>
+        <p id="auth-status" class="auth-status">Teacher login is required to manage registrations.</p>
         <form id="signup-form">
           <div class="form-group">
             <label for="email">Student Email:</label>
@@ -40,6 +42,21 @@
         <div id="message" class="hidden"></div>
       </section>
     </main>
+
+    <dialog id="login-dialog">
+      <form id="login-form">
+        <h3>Teacher Login</h3>
+        <label for="username">Username:</label>
+        <input type="text" id="username" required autocomplete="username" />
+        <label for="password">Password:</label>
+        <input type="password" id="password" required autocomplete="current-password" />
+        <p id="login-error" class="error hidden"></p>
+        <div class="dialog-actions">
+          <button id="cancel-login" type="button" class="secondary-button">Cancel</button>
+          <button type="submit">Log In</button>
+        </div>
+      </form>
+    </dialog>
 
     <footer>
       <p>&copy; 2026 Mergington High School</p>
