@@ -16,12 +16,32 @@ body {
 }
 
 header {
+  position: relative;
   text-align: center;
   padding: 20px 0;
   margin-bottom: 30px;
   background-color: #1a237e;
   color: white;
   border-radius: 5px;
+}
+
+.auth-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: white;
+  color: #1a237e;
+  font-size: 14px;
+}
+
+.auth-button:hover {
+  background-color: #e8eaf6;
+}
+
+.auth-status {
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 14px;
 }
 
 header h1 {
@@ -123,6 +143,53 @@ section h3 {
 
 .delete-btn:hover {
   background-color: #ffebee;
+}
+
+.delete-btn[hidden] {
+  display: none;
+}
+
+dialog {
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  margin: auto;
+  padding: 25px;
+  width: min(90vw, 400px);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+dialog h3 {
+  color: #1a237e;
+  margin-bottom: 20px;
+}
+
+dialog label {
+  display: block;
+  font-weight: bold;
+  margin: 12px 0 5px;
+}
+
+dialog input {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  padding: 10px;
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.secondary-button {
+  background-color: #777;
 }
 
 .participants-section p {
